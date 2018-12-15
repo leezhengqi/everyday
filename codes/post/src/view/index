@@ -1,3 +1,0 @@
-<form id="uploader">
-  <input name="file" type="file" data-token="{{message}}" />
-</form>
