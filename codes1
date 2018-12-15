@@ -1,0 +1,45 @@
+Option Explicit
+
+Sub test1129()
+    Dim FileName As String
+    Dim File As String
+    Dim arr As Variant
+    Dim fso As New Scripting.FileSystemObject
+    'Set fso = CreateObject("Scripting.FileSystemObject")
+    Dim f As TextStream
+    Dim i As Integer
+    Dim j As Integer
+    Dim tStart As Double
+    '使用FSO对象的文件打开功能，打开需处理的文件
+    FileName = Application.GetOpenFilename("*.csv,*.csv")
+    If FileName = "False" Then Exit Sub
+    Set f = fso.OpenTextFile(FileName)
+'单元格初始赋值
+    j = 1
+    i = 0
+ '主程序：1、读取上述文件中的内容；2、字符串分列并赋值给数组；3、将偶数列写入EXCEL单元格中
+ '逻辑：读取一行，分列一行，赋值数组，写入一行；接下来再读下一行，再分列、赋值、写入
+            Do While f.AtEndOfStream = False '用于判断是否读到了文件尾，由于添加了容错代码，此段代码不添加会导致文件读取时吊死
+                    File = f.ReadLine
+                    On Error Resume Next '避免出现“输入超出文件尾”错误时，程序无法继续
+                    arr = Split(File, ",")
+                    For i = 0 To UBound(arr)
+                        If (i + 1) Mod 2 = 0 Then
+                           
+                            Sheets(2).Cells(j, (i + 1) / 2).Value = arr(i)
+
+                          
+                        End If
+                    Next
+                    j = j + 1
+        
+            Loop
+        
+'计算处理时长
+
+    tStart = Timer()
+    DoEvents
+    MsgBox "程序用时" & ":" & (Timer() - tStart) * 1000 & "ms"
+    
+End Sub
+
