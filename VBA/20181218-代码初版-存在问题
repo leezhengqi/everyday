@@ -1,0 +1,87 @@
+Sub MML_Process()
+    '选择文件
+    Dim fileName As String
+    fileName = Application.GetOpenFilename("*.txt,*.txt")
+    If fileName = "False" Then Exit Sub
+    '记录效率时间
+    Dim tStart As Double
+    tStart = Timer()
+    '打开文件
+    Dim fso As New FileSystemObject
+    Dim textHdl As TextStream
+    
+    'Set textHdl = fso.OpenTextFile(fileName)
+    'Set textHdl = fso.OpenTextFile("C:\Users\leezhengqi\Desktop\20181213\MML报文_20150114_192554_12\MML报文_20150114_192554_12.txt")
+    '定义写入的工作簿
+    Dim bkDest As Workbook
+    Set bkDest = Workbooks.Add
+    
+    
+    '按行读取
+    '记录行号
+    Dim iRow As Integer
+    Dim sLine As String
+    Dim sheet_name As String
+    iRow = 1
+    Do While textHdl.AtEndOfStream = False
+        
+        sLine = textHdl.ReadLine
+        '如果文件流中包含%%字符，那么截取/和:之间的内容
+        
+        
+        If InStr(sLine, "%%") Then
+        
+            'sheet_name = Mid(sLine, Application.WorksheetFunction.Find("*/", sLine) + 2, Application.WorksheetFunction.Find(":", sLine) - 2 - Application.WorksheetFunction.Find("*/", sLine))
+            
+            sheet_name = Mid(sLine, InStr("*/", sLine) + 2, InStr(":", sLine) - 2 - InStr("*/", sLine))
+            
+        
+            
+            '比对上述截取的内容与已有sheet名称，如果已存在同名sheet，那么读取文件流内容并写入sheet
+            Dim shtTemp As Worksheet
+            Dim shtExists As Boolean
+            shtExists = False
+            For Each shtTemp In bkDest.Worksheets
+                If shtTemp.Name = sheet_name Then
+                    shtExists = True
+                    Exit For
+                End If
+            Next
+            If shtExists = False Then
+                bkDest.Worksheets.Add.Name = sheet_name
+            End If
+            
+            'If Application.WorksheetFunction.exact(sheet_name, Worksheet) = True Then
+            
+            'End If
+            
+        
+        '否则新建一个sheet，并将其命名为刚才截取的内容
+            'Worksheets.Add
+            'ActiveSheet.Name = sheet_name
+        '然后读取内容并写入sheet
+        End If
+
+        '文本去头尾
+        sLine = Trim(sLine)
+        '替换法处理所有的三个连续空格为两个连续空格；为分列做准备
+        While InStr(1, sLine, "   ") > 0
+            sLine = Replace(sLine, "   ", "  ")
+        Wend
+        '分列
+        Dim arr As Variant
+        arr = Split(sLine, "  ")
+        '根据条件写入excel中
+        If UBound(arr) > 3 Then
+            Sheets(1).Range(Sheets(1).Cells(iRow, 1), Sheets(1).Cells(iRow, UBound(arr) - LBound(arr) + 1)) = arr
+            iRow = iRow + 1
+        End If
+    Loop
+    textHdl.Close
+    MsgBox "处理时长:" & Timer() - tStart & "秒"
+End Sub
+
+
+Sub testWorkbooks()
+    MsgBox Workbooks.Count
+End Sub
