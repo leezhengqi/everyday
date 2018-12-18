@@ -1,0 +1,79 @@
+Option Explicit
+Sub MML_Process()
+    '1、选择文件
+    Dim fileName As String
+    fileName = Application.GetOpenFilename("打开文件,*.txt")
+    '如果未选择文件，那么退出程序，不添加这段程序，会在未选择文件时出现错误
+    If fileName = "False" Then Exit Sub
+    
+    
+    '记录效率时间
+    Dim tStart As Double
+    tStart = Timer()
+    '2、打开文件
+    Dim fso As New FileSystemObject
+    Dim textHdl As TextStream
+    Set textHdl = fso.OpenTextFile(fileName)
+  '定义写入的工作簿
+    Dim bkDest As Workbook
+    Set bkDest = Workbooks.Add
+     
+     
+    
+    '3、文件内容读取并写入
+   
+    Dim iRow As Integer
+    Dim sLine As String
+    Dim sheet_name As String
+    'iRow = 1 '记录行号，用于数据按行读取并写入
+    
+    Do While textHdl.AtEndOfStream = False
+        
+        sLine = textHdl.ReadLine
+        
+        '如果文件流中包含%%字符，那么截取/和:之间的内容
+        
+        If InStr(sLine, "%%") Then
+        
+            sheet_name = Mid(sLine, InStr(1, sLine, "*/") + 2, InStr(1, sLine, ":") - 2 - InStr(1, sLine, "*/"))
+            
+            '比对目标工作簿中已有的sheet名称与sheet_name，如果比对结果是True，那么读取文件流内容并写入sheet
+            Dim shtTemp As Worksheet
+            Dim shtExists As Boolean
+            shtExists = False
+            For Each shtTemp In bkDest.Worksheets
+                If shtTemp.Name = sheet_name Then
+                    shtExists = True
+                    Exit For
+                End If
+            '如果比对结果是False，那么在目标工作簿新建sheet，并命名为sheet_name
+            Next
+            If shtExists = False Then
+                bkDest.Worksheets.Add.Name = sheet_name
+                iRow = 1  '新sheet第一次写入时，从第一行开始写入
+            End If
+
+        End If
+        '文件数据规整，便于接下来数据处理
+
+            
+        sLine = Trim(sLine) '文本去头尾
+        
+        While InStr(1, sLine, "   ") > 0 '替换法处理所有的三个连续空格为两个连续空格；为分列做准备
+            sLine = Replace(sLine, "   ", "  ")
+        Wend
+       
+        Dim arr As Variant     '分列
+        arr = Split(sLine, "  ")
+        
+       
+        If UBound(arr) > 3 Then   '判断是否为有效数据，仅将有效数据写入excel中
+            bkDest.Sheets(sheet_name).Range(Sheets(sheet_name).Cells(iRow, 1), Sheets(sheet_name).Cells(iRow, UBound(arr) - LBound(arr) + 1)) = arr
+            iRow = iRow + 1
+        End If
+    Loop
+    textHdl.Close
+    MsgBox "处理时长:" & Timer() - tStart & "秒"
+End Sub
+
+
