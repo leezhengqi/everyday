@@ -73,6 +73,8 @@ Sub MML_Process()
         End If
     Loop
     textHdl.Close
+        '4、将输出的结果另存为新的工作簿
+    bkDest.SaveAs ("MML处理结果")
     MsgBox "处理时长:" & Timer() - tStart & "秒"
 End Sub
 
