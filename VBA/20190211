@@ -1,0 +1,25 @@
+#日常工作中数据汇总
+#将sheet名称与对应sheet中某一单元格的内容保持一致
+Sub tongji()
+Dim i As Integer
+
+For i = 4 To 9
+
+Sheets(i).Name = Sheets(i).Range("F3")
+
+Next
+
+End Sub
+#提取多个sheet中固定位置的单元格内容到指定sheet的固定单元格中
+Sub total()
+Dim x As Integer
+For x = 1 To 9
+
+Sheets(10).Range("A" & x + 1) = Sheets(x).Name
+Sheets(10).Range("D" & x + 1) = Sheets(x).Range("J12")
+
+
+Next
+
+
+End Sub
