@@ -1,0 +1,56 @@
+#用于自动将EXCEL表中24进制的时间格式转换为小时HOUR（日常工作报表处理）
+select * from
+(
+	select 
+	[姓名],
+	[学号],
+	sum([时长]) as [总时长]
+	from
+	(
+		select 
+		[姓名],
+		[学号],
+		int(left([时长],2))+int(mid([时长],4,2))/60+int(right([时长],2))/3600 as [时长]
+		from [*$]
+	) as T0 
+	group by [姓名],
+	[学号]
+) as T00
+order by [总时长] desc
+
+#用于自动透视统计数据（即从一张数据明细表中根据需要统计出汇总表）
+select
+T0.[二级部门],
+T1.[参与学习人数] as [JH参与学习人数],
+T1.[区域总人数] as [JH区域总人数],
+iif(isnull(T1.[区域总人数]),0, T1.[参与学习人数]/T1.[区域总人数]) as [JH活跃度],
+T1.[平均学习时长] as [JH平均学习时长],
+T2.[参与学习人数] as [ZL参与学习人数],
+T2.[区域总人数] as [ZL区域总人数],
+iif(isnull(T2.[区域总人数]),0, T2.[参与学习人数]/T2.[区域总人数]) as [ZL活跃度],
+T2.[平均学习时长] as [ZL平均学习时长]
+from
+((select distinct [二级部门] from [*$]) as T0
+left join
+(
+select
+[二级部门],
+count([学习时长]) as [参与学习人数],
+avg([学习时长]) as [平均学习时长],
+count([01#员工工号]) as [区域总人数]
+from [*$]
+where [工号开头]="JH"
+group by [二级部门]
+) as T1 on T0.[二级部门] = T1.[二级部门]
+)left join
+(
+select
+[二级部门],
+count([学习时长]) as [参与学习人数],
+avg([学习时长]) as [平均学习时长],
+count([01#员工工号]) as [区域总人数]
+from [*$]
+where [工号开头]="ZL"
+group by [二级部门]
+) as T2
+on T0.[二级部门] = T2.[二级部门]
