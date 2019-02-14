@@ -1,0 +1,31 @@
+Option Explicit
+'将试题库的纵行转成横行
+
+Sub 格式处理()
+Dim i As Integer
+Dim x As Integer
+
+For i = 1 To 10000
+
+    'If Left(Range("B" & i).Value, 1) = "A" Or "B" Or "C" Or "D" Or "E" Or "F" Or "答" Then
+    
+    If Left(Range("B" & i).Value, 1) = "A" Then
+        Range("A" & i) = x
+        Range("A" & i - 1) = x
+        
+    ElseIf Left(Range("B" & i).Value, 1) = "B" Then
+        Range("A" & i) = x
+    ElseIf Left(Range("B" & i).Value, 1) = "C" Then
+        Range("A" & i) = x
+    ElseIf Left(Range("B" & i).Value, 1) = "D" Then
+        Range("A" & i) = x
+    ElseIf Left(Range("B" & i).Value, 1) = "E" Then
+        Range("A" & i) = x
+    ElseIf Left(Range("B" & i).Value, 1) = "F" Then
+        Range("A" & i) = x
+    ElseIf Left(Range("B" & i).Value, 1) = "答" Then
+        Range("A" & i) = x
+        x = x + 1
+    End If
+   
+Next
